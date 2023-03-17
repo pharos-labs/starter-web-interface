@@ -1,20 +1,20 @@
 /*****************************************************************************************
 // Starter Web Interface 6.1.2
 // Copyright (c) 2023 Pharos Controls Ltd. All rights reserved.
-// 
+//
 // This sample content is made freely available for illustrative purposes only.
-// Pharos Controls Ltd grants a non-exclusive copyright license to use this sample 
+// Pharos Controls Ltd grants a non-exclusive copyright license to use this sample
 // content from which you can generate content tailored to your own specific needs for use
-// with products from Pharos Controls Ltd. This sample content has not been 
+// with products from Pharos Controls Ltd. This sample content has not been
 // thoroughly tested under all conditions and Pharos Controls Ltd
 // cannot guarantee reliability or serviceability.
-// 
+//
 // This sample content is provided "as is" without warranties of any kind.
 // The implied warranties of non-infringement, merchantability and fitness for a particular
 // purpose are expressly disclaimed. In no event shall Pharos Controls Ltd be liable
 // to any party for direct, indirect, incidental or consequential damages arising from the use of
 // this sample content.
-// 
+//
 // For further information please contact support@pharoscontrols.com.
 //*****************************************************************************************/
 
@@ -37,6 +37,7 @@ var gLimit = 340;
 var intStart = "off"
 var intBlock = false;
 var auth = true;
+var groupSort = "alpha"; // The sort order of the groups, can be num (sort by number), alpha (sort alphabetically), otherwise sort will be in creation order
 
 function pad(str, max) {
 	str = str.toString();
@@ -90,7 +91,7 @@ function updateZoneLevel() {
 				} else {
 					$('#intSwitch' + t.groups[i].num).prop("checked", true);
 				}
-			}	
+			}
 		}
 	});
 	setTimeout(function() {intBlock = false;}, 500);
@@ -152,7 +153,7 @@ function timelines() {
 					} else if (t.timelines[i].group === "H") {
 						$('.accSub8').append('<div onclick="start_timeline(' + t.timelines[i].num + ')" class="btn2" id="timeline' + t.timelines[i].num + '">' + t.timelines[i].name + '</div>');
 					}
-				}	
+				}
 			}
 		}
 		for (var h = 0; h < 9; h++) {
@@ -254,7 +255,7 @@ function scenes() {
 						} else if (t.scenes[i].group === "H") {
 							$('.accSCsub8').append('<div onclick="start_scene(' + t.scenes[i].num + ')" class="btn2" id="scene' + t.scenes[i].num + '">' + t.scenes[i].name + '</div>');
 						}
-					}	
+					}
 				}
 			}
 			for (var h = 0; h < 9; h++) {
@@ -273,7 +274,7 @@ function scenes() {
 					}
 					var myLength = msToTime(t.scenes[p].length);
 					var myScState = t.scenes[p].state.replace(/\_/g, ' ');
-					
+
 					if (t.scenes[p].group == "") {
 						if ((t.scenes[p].onstage == true && t.scenes[p].state == "started")) {
 							$('.systemStatusScenes').append('<div class="statusContainer"><div class="timelineNumContainer"><div class="groupInfo"><div class="timelineNum">' + t.scenes[p].num + '</div><div class="label">SCENE</div></div></div><div class="showContainer"><div id="show' + t.scenes[p].num + '" class="showInfo"><div class="showStatus">' + myScState + '</div><div class="showName">' + t.scenes[p].name + '</div><div class="groupLocation">' + t.scenes[p].custom_properties['Zone'] + '</div><div class="groupName">UNGROUPED</div></div></div>');
@@ -306,23 +307,47 @@ function scenes() {
 
 function groups() {
 	Query.get_group_info(function(t) {
-		var grNum = Object.keys(t.groups).length;
+
+		// Create a shallow copy of the group info for sorting
+		var sortedGroups = [...t.groups];
+
+		if(groupSort=="num") {
+			sortedGroups.sort(function(a,b) {
+				return a.num - b.num;
+			});
+		}
+
+		if(groupSort=="alpha") {
+			sortedGroups.sort(function(a,b) {
+				if (a.name < b.name) {
+				  return -1;
+				}
+				if (a.name > b.name) {
+				  return 1;
+				}
+				return 0;
+			});
+		}
+
+		var grNum = Object.keys(sortedGroups).length;
 		$('.groupStatus').append('<div class="sliderContainer" id="sliderContainer0"><div class="slider_title">ALL</div><div class="sliderInput"><input class="amount" id="amount0" readonly type="text"></div><div class="groupSwitch"><input type="checkbox" id="groupSwitch0" name="toggle" onclick="groupBox(0)" checked="true"><label for="toggle"><i></i></label><span></span></div><div class="sliderbg" align="center"><div align="center" class="slider" id="slider0"></div></div></div>');
 		$('body').append('<script>$(function() {$("#slider0").slider({orientation: "horizontal",range: "min", min: 0, max: 100, value: 100, step: 1, slide: function(change, ui){$("#amount0").val(ui.value);INTthrottled0(ui.value);},stop: function(change, ui) {$("#amount0").val(ui.value);INTthrottled0(ui.value);},change: function(change, ui) {$("#amount0").val(ui.value);INTthrottled0(ui.value);}});$("#amount0").val($("#slider0").slider("value"));});function sendINT0(int) {if (intBlock) {} else {var newInt = parseInt(int,10) /100;Query.master_intensity({"num":"0", "level": newInt});}}var INTthrottled0 = $.throttle(100, sendINT0); </script>');
 		$('.masterIntensity').append('<div class="intensityContainer" id="intensityContainer0"><div class="slider_title">ALL</div><div class="sliderInput"><input class="amount" id="intensityAmount0" readonly type="text"></div><div class="groupSwitch"><input type="checkbox" id="intensitySwitch0" name="toggle" onclick="groupBox(0)" checked="true"><label for="toggle"><i></i></label><span></span></div><div class="sliderbg" align="center"><div align="center" class="slider" id="intensity0"></div></div></div>');
 		$('body').append('<script>$(function() {$("#intensity0").slider({orientation: "horizontal",range: "min", min: 0, max: 100, value: 100,  step: 1,slide: function(change, ui){$("#intensityAmount0").val(ui.value);INTthrottled0(ui.value);},stop: function(change, ui) {$("#intensityAmount0").val(ui.value);INTthrottled0(ui.value);},change: function(change, ui) {$("#intensityAmount0").val(ui.value);INTthrottled0(ui.value);}});$("#intensityAmount0").val($("#intensity0").slider("value"));});function sendINT0(int) {if (intBlock) {} else {var newInt = parseInt(int,10) /100;Query.master_intensity({"num":"0", "level": newInt});}}var INTthrottled0 = $.throttle(100, sendINT0); </script>');
-		//$('.groupStatus, .zoneContainer, .groupBtns').html("");
-		for (var k = 1; k < grNum; k++) {
-			if (t.groups[k].num > 0 && t.groups[k].num !== null && t.groups[k].num < gLimit) {
-				var myName = "'" + t.groups[k].name + "'";
-				$('.zoneContainer').append('<div class="zone"><div class="zoneGroup" id="zone' + k + '" onClick="setIntGroup(' + t.groups[k].num + ',' + myName + ')"><div class="zoneTitle">' + t.groups[k].name + '</div><div class="zoneLevel zoneLevel' + t.groups[k].num + '">' + t.groups[k].level + '%</div></div><div class="intSwitch"><input id="intSwitch' + t.groups[k].num + '" type="checkbox" name="toggle" onClick="intBox(' + t.groups[k].num + ')"  checked><label for="toggle"><i></i></label><span></span></div></div>');
-				$('.groupBtns').append('<div id="group' + t.groups[k].num + '" onClick="setGroup(' + t.groups[k].num + ')" class="btn2 group">' + t.groups[k].name + '</div>');
-				$('.groupStatus').append('<div class="sliderContainer" id="sliderContainer' + k + '"><div class="slider_title">' + t.groups[k]["name"] + '</div><div class="sliderInput"><input class="amount" id="amount' + t.groups[k].num + '" readonly type="text"></div><div class="groupSwitch"><input type="checkbox" id="groupSwitch' + t.groups[k].num + '" name="toggle" onclick="groupBox(' + t.groups[k].num + ')" checked="true"><label for="toggle"><i></i></label><span></span></div><div class="sliderbg" align="center"><div align="center" class="slider" id="slider' + t.groups[k].num + '"></div></div></div>');
-				$('body').append('<script>$(function() {$("#slider' + t.groups[k].num + '").slider({orientation: "horizontal",range: "min", min: 0, max: 100, value: 100, step: 1,slide: function(change, ui) {$("#amount' + t.groups[k].num + '").val(ui.value);INTthrottled' + t.groups[k].num + '(ui.value);},stop: function(change, ui) {$("#amount' + t.groups[k].num + '").val(ui.value);INTthrottled' + t.groups[k].num + '(ui.value);},change: function(change, ui) {$("#amount' + t.groups[k].num + '").val(ui.value);INTthrottled' + t.groups[k].num + '(ui.value);}});$("#amount' + t.groups[k].num + '").val($("#slider' + t.groups[k].num + '").slider("value"));});function sendINT' + t.groups[k].num + '(int) {if (intBlock) {} else {var newInt = parseInt(int,10) /100;Query.master_intensity({"num":' + t.groups[k].num + ', "level": newInt });}}var INTthrottled' + t.groups[k].num + ' = $.throttle(100, sendINT' + t.groups[k].num + '); </script>');
-				$('.masterIntensity').append('<div class="intensityContainer" id="intensityContainer' + k + '"><div class="slider_title">' + t.groups[k]["name"] + '</div><div class="sliderInput"><input class="amount" id="intensityAmount' + t.groups[k].num + '" readonly type="text"></div><div class="groupSwitch"><input type="checkbox" id="intensitySwitch' + t.groups[k].num + '" name="toggle" onclick="groupBox(' + t.groups[k].num + ')" checked="true"><label for="toggle"><i></i></label><span></span></div><div class="sliderbg" align="center"><div align="center" class="slider" id="intensity' + t.groups[k].num + '"></div></div></div>');
-				$('body').append('<script>$(function() {$("#intensity' + t.groups[k].num + '").slider({orientation: "horizontal",range: "min", min: 0, max: 100, value: 100,  step: 1,slide: function(change, ui) {$("#intensityAmount' + t.groups[k].num + '").val(ui.value);INTthrottled' + t.groups[k].num + '(ui.value);},stop: function(change, ui) {$("#intensityAmount' + t.groups[k].num + '").val(ui.value);INTthrottled' + t.groups[k].num + '(ui.value);},change: function(change, ui) {$("#intensityAmount' + t.groups[k].num + '").val(ui.value);INTthrottled' + t.groups[k].num + '(ui.value);}});$("#intensityAmount' + t.groups[k].num + '").val($("#intensity' + t.groups[k].num + '").slider("value"));});function sendINT' + t.groups[k].num + '(int) {if (intBlock) {} else {var newInt = parseInt(int,10) /100;Query.master_intensity({"num":' + t.groups[k].num + ', "level": newInt });}}var INTthrottled' + t.groups[k].num + ' = $.throttle(100, sendINT' + t.groups[k].num + '); </script>');
+
+		var grCount = 0; // Track the number of groups added
+		sortedGroups.forEach((group) => {
+			if (group.num > 0 && group.num !== null && grCount < gLimit) {
+				var myName = "'" + group.name + "'";
+				$('.zoneContainer').append('<div class="zone"><div class="zoneGroup" id="zone' + grCount + '" onClick="setIntGroup(' + group.num + ',' + myName + ')"><div class="zoneTitle">' + group.name + '</div><div class="zoneLevel zoneLevel' + group.num + '">' + group.level + '%</div></div><div class="intSwitch"><input id="intSwitch' + group.num + '" type="checkbox" name="toggle" onClick="intBox(' + group.num + ')"  checked><label for="toggle"><i></i></label><span></span></div></div>');
+				$('.groupBtns').append('<div id="group' + group.num + '" onClick="setGroup(' + group.num + ')" class="btn2 group">' + group.name + '</div>');
+				$('.groupStatus').append('<div class="sliderContainer" id="sliderContainer' + grCount + '"><div class="slider_title">' + group["name"] + '</div><div class="sliderInput"><input class="amount" id="amount' + group.num + '" readonly type="text"></div><div class="groupSwitch"><input type="checkbox" id="groupSwitch' + group.num + '" name="toggle" onclick="groupBox(' + group.num + ')" checked="true"><label for="toggle"><i></i></label><span></span></div><div class="sliderbg" align="center"><div align="center" class="slider" id="slider' + group.num + '"></div></div></div>');
+				$('body').append('<script>$(function() {$("#slider' + group.num + '").slider({orientation: "horizontal",range: "min", min: 0, max: 100, value: 100, step: 1,slide: function(change, ui) {$("#amount' + group.num + '").val(ui.value);INTthrottled' + group.num + '(ui.value);},stop: function(change, ui) {$("#amount' + group.num + '").val(ui.value);INTthrottled' + group.num + '(ui.value);},change: function(change, ui) {$("#amount' + group.num + '").val(ui.value);INTthrottled' + group.num + '(ui.value);}});$("#amount' + group.num + '").val($("#slider' + group.num + '").slider("value"));});function sendINT' + group.num + '(int) {if (intBlock) {} else {var newInt = parseInt(int,10) /100;Query.master_intensity({"num":' + group.num + ', "level": newInt });}}var INTthrottled' + group.num + ' = $.throttle(100, sendINT' + group.num + '); </script>');
+				$('.masterIntensity').append('<div class="intensityContainer" id="intensityContainer' + grCount + '"><div class="slider_title">' + group["name"] + '</div><div class="sliderInput"><input class="amount" id="intensityAmount' + group.num + '" readonly type="text"></div><div class="groupSwitch"><input type="checkbox" id="intensitySwitch' + group.num + '" name="toggle" onclick="groupBox(' + group.num + ')" checked="true"><label for="toggle"><i></i></label><span></span></div><div class="sliderbg" align="center"><div align="center" class="slider" id="intensity' + group.num + '"></div></div></div>');
+				$('body').append('<script>$(function() {$("#intensity' + group.num + '").slider({orientation: "horizontal",range: "min", min: 0, max: 100, value: 100,  step: 1,slide: function(change, ui) {$("#intensityAmount' + group.num + '").val(ui.value);INTthrottled' + group.num + '(ui.value);},stop: function(change, ui) {$("#intensityAmount' + group.num + '").val(ui.value);INTthrottled' + group.num + '(ui.value);},change: function(change, ui) {$("#intensityAmount' + group.num + '").val(ui.value);INTthrottled' + group.num + '(ui.value);}});$("#intensityAmount' + group.num + '").val($("#intensity' + group.num + '").slider("value"));});function sendINT' + group.num + '(int) {if (intBlock) {} else {var newInt = parseInt(int,10) /100;Query.master_intensity({"num":' + group.num + ', "level": newInt });}}var INTthrottled' + group.num + ' = $.throttle(100, sendINT' + group.num + '); </script>');
+				grCount++;
 			}
-		}
+		});
 	});
 }
 
@@ -429,7 +454,7 @@ function updateScenes(callback) {
 					}
 				}
 			}
-			
+
 		}
 	});
 	callback();
@@ -443,7 +468,7 @@ function updateScroll() {
 		console.log("scroll = " + myScrollHeight + " height = " + myHeight);
 	if (newScrollHeight > myHeight) {
 		$('.systemStatusContainer .subLabel').html("(Scroll)");
-		
+
 	} else {
 		$('.systemStatusContainer .subLabel').html("");
 	}
@@ -463,7 +488,7 @@ function updateScroll() {
 			$('.systemStatusContainer .subLabel').html("");
 		} else {
 			$('.noStatus').remove();
-			
+
 		}
 	}, 200);
 }
@@ -491,7 +516,7 @@ function triggers() {
 			$('aside').html("");
 			for (var k = 0; k < trNum; k++) {
 				if (t.triggers[k].name === "") {
-					var myTriggerName = "Trigger " + t.triggers[k].num;					
+					var myTriggerName = "Trigger " + t.triggers[k].num;
 				} else {
 					var myTriggerName = t.triggers[k].name;
 				}
@@ -501,7 +526,7 @@ function triggers() {
 					//Updating with ellipsis if the string was truncated
 					var shortText = truncated + (truncated.length < 15 ? '' : '...');
 				} else {
-				
+
 				var trWidth = parseInt($('.accordion').width(),0) - 80;
 					var charLength = Math.ceil(parseInt(trWidth, 0) * .07);
 			console.log("charlength = " + charLength);
@@ -510,7 +535,7 @@ function triggers() {
 					//Updating with ellipsis if the string was truncated
 					var shortText = truncated + (truncated.length < charLength ? '' : '...');
 				}
-				
+
 				$('aside').append('<h1 id="trTitle' + k + '" class="trTitle" onClick="triangle(' + t.triggers[k].num + ')" style="background-color:' + t.triggers[k].group + ';"><span class="tri' + t.triggers[k].num + ' triangle"></span>&nbsp;' + shortText + '<span id="trigger' + t.triggers[k].num + '" class="tBtn" onClick="fireTrigger(' + t.triggers[k].num + ')">RUN</span></h1><div id="triggerCon' + t.triggers[k].num + '" class="triggerCon"><h2 id="conTitle' + t.triggers[k].num + '" class="conTitle">CONDITIONS</h2><div id="tCon' + t.triggers[k].num + '" class="conCon"></div><h2 id="actTitle' + t.triggers[k].num + '" class="actTitle">ACTIONS</h2><div id="tAct' + t.triggers[k].num + '" class="actCon"></div>');
 				var trCon = Object.keys(t.triggers[k].conditions).length;
 				if (trCon > 0) {
@@ -651,7 +676,7 @@ Query.subscribe_group_status(function(g) {
 			if (g.level == 0) {$('#intensitySwitch' + g.num).prop('checked', false);}else{$('#intensitySwitch' + g.num).prop('checked', true);}
 		} else if (myHash === "#page4") {
 			//		if($('.zoneLevel').val() === g.levels) {
-			//			
+			//
 			//			//do nothing
 			//		} else {
 			$('.zoneLevel' + g.num).text(g.level + "%");
@@ -744,10 +769,10 @@ function fireTrigger(num) {
 		});
 		alert("Trigger Number " + num + " was run with conditions tested.");
 		//		myFadeOut('.triggerAlert', function() {
-		//			
+		//
 		//				myFadeIn('.triggerAlert',num);
-		//			
-		//			
+		//
+		//
 		//		});
 	} else {
 		Query.fire_trigger({
@@ -897,7 +922,7 @@ function setIntGroup(num, name) {
 	$('#dimmer .dial').val(curLevel[0] + "%").trigger("change");
 }
 $(document).ready(function() {
-	
+
 	$('.help').click(function() {
 		lastHash = location.hash;
 		document.location = "index.html#page5";
@@ -1237,4 +1262,3 @@ $(document).ready(function() {
 		}
 	})
 });
-
