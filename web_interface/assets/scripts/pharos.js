@@ -27,7 +27,6 @@ var sccOpen = 0;
 var lastHash = 0;
 var selectedGroup = "";
 var controllerType = "";
-var myGroups = ["Ungrouped", "Group A", "Group B", "Group C", "Group D", "Group E", "Group F", "Group G", "Group H"];
 var testConditions = false;
 var intGroup = "";
 var myFilter = [0, 0, 0, 0, 0, 0, 0, 0];
@@ -38,6 +37,7 @@ var intStart = "off"
 var intBlock = false;
 var auth = true;
 var groupSort = "alpha"; // The sort order of the groups, can be num (sort by number), alpha (sort alphabetically), otherwise sort will be in creation order
+var playbackGroupNames = []; // This is loaded with group names as they arrive
 
 function pad(str, max) {
 	str = str.toString();
@@ -129,30 +129,28 @@ function timelines() {
 			$('.tlSwitch, .timelineContainer').remove();
 		} else {
 			$('.buttons').html("");
-			for (var k = 0; k < myGroups.length; k++) {
-				$('.buttons').append('<div class="accTop accTop' + k + '"  onclick="header(' + k + ')">' + myGroups[k] + '</div><div class="clear accSub accSub' + k + '" ></div>');
+			for (var k = 0; k <= 8; k++) {
+				$('.buttons').append('<div class="accTop accTop' + k + '"  onclick="header(' + k + ')">UNGROUPED</div><div class="clear accSub accSub' + k + '" ></div>');
 			}
 			for (var i = 0; i < tlNum; i++) {
 				if (t.timelines[i].num >= tLimit) {} else {
-					if (t.timelines[i].group === "") {
-						$('.accSub0').append('<div onclick="start_timeline(' + t.timelines[i].num + ')" class="btn2" id="timeline' + t.timelines[i].num + '">' + t.timelines[i].name + '</div>');
-					} else if (t.timelines[i].group === "A") {
-						$('.accSub1').append('<div onclick="start_timeline(' + t.timelines[i].num + ')" class="btn2" id="timeline' + t.timelines[i].num + '">' + t.timelines[i].name + '</div>');
-					} else if (t.timelines[i].group === "B") {
-						$('.accSub2').append('<div onclick="start_timeline(' + t.timelines[i].num + ')" class="btn2" id="timeline' + t.timelines[i].num + '">' + t.timelines[i].name + '</div>');
-					} else if (t.timelines[i].group === "C") {
-						$('.accSub3').append('<div onclick="start_timeline(' + t.timelines[i].num + ')" class="btn2" id="timeline' + t.timelines[i].num + '">' + t.timelines[i].name + '</div>');
-					} else if (t.timelines[i].group === "D") {
-						$('.accSub4').append('<div onclick="start_timeline(' + t.timelines[i].num + ')" class="btn2" id="timeline' + t.timelines[i].num + '">' + t.timelines[i].name + '</div>');
-					} else if (t.timelines[i].group === "E") {
-						$('.accSub5').append('<div onclick="start_timeline(' + t.timelines[i].num + ')" class="btn2" id="timeline' + t.timelines[i].num + '">' + t.timelines[i].name + '</div>');
-					} else if (t.timelines[i].group === "F") {
-						$('.accSub6').append('<div onclick="start_timeline(' + t.timelines[i].num + ')" class="btn2" id="timeline' + t.timelines[i].num + '">' + t.timelines[i].name + '</div>');
-					} else if (t.timelines[i].group === "G") {
-						$('.accSub7').append('<div onclick="start_timeline(' + t.timelines[i].num + ')" class="btn2" id="timeline' + t.timelines[i].num + '">' + t.timelines[i].name + '</div>');
-					} else if (t.timelines[i].group === "H") {
-						$('.accSub8').append('<div onclick="start_timeline(' + t.timelines[i].num + ')" class="btn2" id="timeline' + t.timelines[i].num + '">' + t.timelines[i].name + '</div>');
+					// Allow a total of 8 group name slots to be used, others go in the default section
+					var playbackGroupName = t.timelines[i].group;
+					var playbackGroupIndex = 0;
+
+					if(playbackGroupName!="")
+					{
+						if(!playbackGroupNames.includes(playbackGroupName) && playbackGroupNames.length < 8) {
+							playbackGroupNames.push(playbackGroupName);
+						}
+						playbackGroupIndex = playbackGroupNames.indexOf(playbackGroupName) + 1;
+
+						if(playbackGroupIndex>0) {
+							$(`.accTop${playbackGroupIndex}`).text(playbackGroupName);
+						}
+
 					}
+					$(`.accSub${playbackGroupIndex}`).append('<div onclick="start_timeline(' + t.timelines[i].num + ')" class="btn2" id="timeline' + t.timelines[i].num + '">' + t.timelines[i].name + '</div>');
 				}
 			}
 		}
@@ -231,31 +229,28 @@ function scenes() {
 				$('.tlSwitch, .scenesContainer').remove();
 			} else {
 				$('.scenes').html("");
-				for (var k = 0; k < myGroups.length; k++) {
-					$('.scenes').append('<div class="accSCtop accSCtop' + k + '"  onclick="accSCsub(' + k + ')">' + myGroups[k] + '</div><div class="clear accSCsub accSCsub' + k + '" ></div>');
+				for (var k = 0; k <= 8; k++) {
+					$('.scenes').append('<div class="accSCtop accSCtop' + k + '"  onclick="accSCsub(' + k + ')">UNGROUPED</div><div class="clear accSCsub accSCsub' + k + '" ></div>');
 				}
 				for (var i = 0; i < scNum; i++) {
-					if (t.scenes[i].num >= sLimit) {} else {
-						if (t.scenes[i].group === "") {
-							$('.accSCsub0').append('<div onclick="start_scene(' + t.scenes[i].num + ')" class="btn2" id="scene' + t.scenes[i].num + '">' + t.scenes[i].name + '</div>');
-						} else if (t.scenes[i].group === "A") {
-							$('.accSCsub1').append('<div onclick="start_scene(' + t.scenes[i].num + ')" class="btn2" id="scene' + t.scenes[i].num + '">' + t.scenes[i].name + '</div>');
-						} else if (t.scenes[i].group === "B") {
-							$('.accSCsub2').append('<div onclick="start_scene(' + t.scenes[i].num + ')" class="btn2" id="scene' + t.scenes[i].num + '">' + t.scenes[i].name + '</div>');
-						} else if (t.scenes[i].group === "C") {
-							$('.accSCsub3').append('<div onclick="start_scene(' + t.scenes[i].num + ')" class="btn2" id="scene' + t.scenes[i].num + '">' + t.scenes[i].name + '</div>');
-						} else if (t.scenes[i].group === "D") {
-							$('.accSCsub4').append('<div onclick="start_scene(' + t.scenes[i].num + ')" class="btn2" id="scene' + t.scenes[i].num + '">' + t.scenes[i].name + '</div>');
-						} else if (t.scenes[i].group === "E") {
-							$('.accSCsub5').append('<div onclick="start_scene(' + t.scenes[i].num + ')" class="btn2" id="scene' + t.scenes[i].num + '">' + t.scenes[i].name + '</div>');
-						} else if (t.scenes[i].group === "F") {
-							$('.accSCsub6').append('<div onclick="start_scene(' + t.scenes[i].num + ')" class="btn2" id="scene' + t.scenes[i].num + '">' + t.scenes[i].name + '</div>');
-						} else if (t.scenes[i].group === "G") {
-							$('.accSCsub7').append('<div onclick="start_scene(' + t.scenes[i].num + ')" class="btn2" id="scene' + t.scenes[i].num + '">' + t.scenes[i].name + '</div>');
-						} else if (t.scenes[i].group === "H") {
-							$('.accSCsub8').append('<div onclick="start_scene(' + t.scenes[i].num + ')" class="btn2" id="scene' + t.scenes[i].num + '">' + t.scenes[i].name + '</div>');
+
+					// Allow a total of 8 group name slots to be used, others go in the default section
+					var playbackGroupName = t.scenes[i].group;
+					var playbackGroupIndex = 0;
+
+					if(playbackGroupName!="")
+					{
+						if(!playbackGroupNames.includes(playbackGroupName) && playbackGroupNames.length < 8) {
+							playbackGroupNames.push(playbackGroupName);
+						}
+						playbackGroupIndex = playbackGroupNames.indexOf(playbackGroupName) + 1;
+
+						if(playbackGroupIndex>0) {
+							$(`.accSCtop${playbackGroupIndex}`).text(playbackGroupName);
 						}
 					}
+					$(`.accSCsub${playbackGroupIndex}`).append('<div onclick="start_scene(' + t.scenes[i].num + ')" class="btn2" id="scene' + t.scenes[i].num + '">' + t.scenes[i].name + '</div>');
+
 				}
 			}
 			for (var h = 0; h < 9; h++) {
