@@ -20,8 +20,9 @@
 
 
 
+
 @charset "UTF-8";
-/* CSS Document */
+/* Pharos Blue Version */
 :root {
 	/* Primary Color - Page Background */
 	--pri: #e6e6e6;
@@ -76,5 +77,7 @@
 	/* Border Radius - Rounding of Element Corners */
 	--rad: 20px;
 }
+
+
 
 
