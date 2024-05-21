@@ -1,6 +1,6 @@
 /*****************************************************************************************
-// Starter Web Interface 6.1.2
-// Copyright (c) 2023 Pharos Controls Ltd. All rights reserved.
+// Starter Web Interface 8.0.0
+// Copyright (c) 2024 Pharos Controls Ltd. All rights reserved.
 // 
 // This sample content is made freely available for illustrative purposes only.
 // Pharos Controls Ltd grants a non-exclusive copyright license to use this sample 
